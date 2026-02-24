@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../config/db.js";
+import sequelize from "../db/index.js";
 
 const User = sequelize.define(
   "User",
@@ -38,4 +38,4 @@ const User = sequelize.define(
   }
 );
 
-export default User;
+export { User };
