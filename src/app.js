@@ -17,7 +17,7 @@ app.use(express.urlencoded({extended: true, limit: "16kb"}));
 app.use(express.static("public"));
 
 // 2️⃣ create tables
-await sequelize.sync({ alter: true }); 
+await sequelize.sync();
 // alter:true updates structure without deleting data
 
 console.log("Tables created successfully");

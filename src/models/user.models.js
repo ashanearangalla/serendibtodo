@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db/index.js";
+import bcrypt from "bcrypt";
 
 const User = sequelize.define(
   "User",
@@ -37,5 +38,15 @@ const User = sequelize.define(
     timestamps: true, // automatically adds createdAt & updatedAt
   }
 );
+
+User.prototype.isPasswordCorrect = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+User.beforeSave(async (user) => {
+  if (user.changed("password")) {
+    user.password = await bcrypt.hash(user.password, 10);
+  }
+});
 
 export { User };
