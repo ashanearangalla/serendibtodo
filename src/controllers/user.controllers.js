@@ -1,9 +1,30 @@
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import bcrypt from "bcrypt";
 import { User } from "../models/user.models.js";
 import { Op } from "sequelize";
 import { ApiResponse } from "../utils/ApiResponse.js";
+
+const generateAcessAndRefreshTokens = async (userId) => {
+  try {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    const accessToken = user.generateAccessToken();
+
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await user.save({validate: false});
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    console.error("Token generation failed", error);
+    throw new ApiError(500, "Token generation failed");
+  }
+}
 
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -18,6 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
       [Op.or]: [{ email }, { username }],
     },
   });
+
 
   if (existedUser) {
     throw new ApiError(409, "User with this email or username already exists");
@@ -70,16 +92,31 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid email or password");
   }
 
-  const userResponse = {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    createdAt: user.createdAt,
-  };
+  const { accessToken, refreshToken } = await generateAcessAndRefreshTokens(user.id);
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, userResponse, "User logged in successfully"));
+  const loggedInUser = await User.findByPk(user.id, {
+    attributes: { exclude: ["password", "refreshToken"] }
+  });
+
+ if(!loggedInUser) {
+        throw new ApiError(500, "Something went wrong when logging in user");
+    }
+
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict"
+    }
+
+   return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json( new ApiResponse(
+            200, 
+           { user: loggedInUser},
+           "User logged in successfully"
+        ));
 })
 
 export { registerUser, loginUser };

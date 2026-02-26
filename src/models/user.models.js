@@ -1,6 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db/index.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
 const User = sequelize.define(
   "User",
@@ -33,6 +35,10 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+
+    refreshToken: {
+      type: DataTypes.STRING,
+    },
   },
   {
     timestamps: true, // automatically adds createdAt & updatedAt
@@ -48,5 +54,27 @@ User.beforeSave(async (user) => {
     user.password = await bcrypt.hash(user.password, 10);
   }
 });
+
+User.prototype.generateAccessToken = function () {
+  return jwt.sign(
+    {
+      id: this.id,
+      username: this.username,
+      email: this.email,
+    },
+    process.env.ACCESS_TOKEN_SECRET, // you can generate using crypto modules
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+  );
+};
+
+User.prototype.generateRefreshToken = function () {
+  return jwt.sign(
+    {
+      id: this.id,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+  );
+};
 
 export { User };

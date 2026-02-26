@@ -2,11 +2,11 @@ import { Sequelize } from "sequelize";
 
 // create sequelize instance
 const sequelize = new Sequelize(
-  "tododb",      // database name
-  "root",        // username
-  "",            // password
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: "localhost",
+    host: process.env.DB_HOST,
     dialect: "mysql",
     logging: false, // remove SQL logs in console (optional)
     pool: {
