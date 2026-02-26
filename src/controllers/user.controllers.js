@@ -119,4 +119,36 @@ const loginUser = asyncHandler(async (req, res) => {
         ));
 })
 
-export { registerUser, loginUser };
+
+const logoutUser = asyncHandler(async (req, res) => {
+    const userId = req.user?.id;
+
+    console.log("userID", userId);
+    
+    if (!userId) {
+        throw new ApiError(401, "Unauthorized: User ID not found in request");
+    }
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+        throw new ApiError(401, "Unauthorized: User not found");
+    }
+
+    user.refreshToken = null;
+    await user.save({validate: false});
+
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict"
+    }
+
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, {}, "User logged out successfully"));
+})
+
+export { registerUser, loginUser, logoutUser };

@@ -1,4 +1,9 @@
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { Todo } from "../models/todo.models.js";
+
+
 
 const addTodo = asyncHandler(async (req, res) => {
     const {title} = req.body;
@@ -7,5 +12,33 @@ const addTodo = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Title is required and cannot be empty");
     }
 
+    // Get logged in user ID
+
+    const userId = req.user?.id;
+    console.log("ttitle", title);
+    console.log("userID", userId);
+
+    if (!userId) {
+        throw new ApiError(401, "Unauthorized: User ID not found in request");
+    }
+
+    // Create todo for the user
+    try {
+        const newTodo = await Todo.create({
+            title,
+            userId,
+        });
+
+        return res
+        .status(201)
+        .json(new ApiResponse(201, newTodo, "Todo created successfully"));
+
+
+    } catch (error) {
+        throw new ApiError(500, error.message || "Internal Server Error");
+    }
+
     
 })
+
+export { addTodo };

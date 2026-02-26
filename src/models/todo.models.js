@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db/index.js";
-import User from "./User.js";
+import { User } from "./user.models.js";
+
 
 const Todo = sequelize.define(
   "Todo",
@@ -24,7 +25,6 @@ const Todo = sequelize.define(
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      unique: true, // ⭐ important for 1:1
       references: {
         model: User,
         key: "id",
@@ -36,4 +36,4 @@ const Todo = sequelize.define(
   }
 );
 
-export default Todo;
+export { Todo };
