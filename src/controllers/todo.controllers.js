@@ -15,7 +15,7 @@ const addTodo = asyncHandler(async (req, res) => {
     // Get logged in user ID
 
     const userId = req.user?.id;
-    console.log("ttitle", title);
+    console.log("title", title);
     console.log("userID", userId);
 
     if (!userId) {
