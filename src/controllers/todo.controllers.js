@@ -41,4 +41,65 @@ const addTodo = asyncHandler(async (req, res) => {
     
 })
 
-export { addTodo };
+const getTodos = asyncHandler(async (req, res) => {
+    // Get logged in user ID
+
+    const userId = req.user?.id;
+
+    if(!userId) {
+        throw new ApiError(401, "Unauthorized: User ID not found in request");
+    }
+
+        // Fetch todos for the user
+    try {
+        const todos = await Todo.findAll({
+            where: { userId },
+            order: [["createdAt", "ASC"]],
+
+        })
+
+        res
+            .status(200)
+            .json(new ApiResponse(
+                200, 
+                todos, 
+                "Todos fetched successfully"
+            ));
+    } catch (error) {
+        throw new ApiError(500, error.message || "Internal Server Error");
+    }
+})
+
+const getTodoById = asyncHandler(async (req, res) => {
+    const userId = req.user?.id;
+    const todoId = req.params.id;
+
+    if (!userId) {
+        throw new ApiError(401, "Unauthorized: User ID not found in request");
+    }
+
+    try {
+        const todo = await Todo.findOne({
+            where: {
+                id: todoId,
+                userId
+            }
+        });
+
+        if (!todo) {
+            throw new ApiError(404, "Todo not found");
+        }
+
+        res
+            .status(200)
+            .json(new ApiResponse(
+                200, 
+                todo, 
+                "Todo fetched successfully"
+            ));
+    } catch (error) {
+        throw new ApiError(500, error.message || "Internal Server Error");
+    }
+});
+
+export { addTodo, getTodos, getTodoById };
