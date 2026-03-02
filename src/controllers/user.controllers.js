@@ -27,7 +27,7 @@ const generateAcessAndRefreshTokens = async (userId) => {
   }
 }
 
-
+// g
 const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -69,6 +69,7 @@ const registerUser = asyncHandler(async (req, res) => {
   
 
 });
+//s
 
 const loginUser = asyncHandler(async (req, res) => {
   

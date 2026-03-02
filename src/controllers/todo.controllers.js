@@ -12,7 +12,7 @@ const addTodo = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Title is required and cannot be empty");
     }
 
-    // Get logged in user ID
+    // Get logge n uer ID
 
     const userId = req.user?.id;
     console.log("title", title);
@@ -42,7 +42,7 @@ const addTodo = asyncHandler(async (req, res) => {
 })
 
 const getTodos = asyncHandler(async (req, res) => {
-    // Get logged in user ID
+    // Get logged in usr ID
 
     const userId = req.user?.id;
 
@@ -50,7 +50,7 @@ const getTodos = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Unauthorized: User ID not found in request");
     }
 
-        // Fetch todos for the user
+        // Fetch tods r the user
     try {
         const todos = await Todo.findAll({
             where: { userId },
